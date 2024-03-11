@@ -1,20 +1,5 @@
-const page = document.querySelector("html")
-let selectedText = "Do re mi la fasola";
+let selectedText = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga debitis maiores deleniti exercitationem quos consectetur iusto illo placeat, quibusdam impedit. Dignissimos, praesentium quidem? Consectetur autem mollitia reprehenderit veniam neque officiis odit vero, corrupti, recusandae tenetur beatae repellat corporis quos? Porro autem quos quod omnis maxime earum rerum dolorem repellat laboriosam.";
 let toDisplay, selecting = false, firstSelected = false, lastSelected = false;
-
-const makeBold = (string, start, end) => {
-  let newString = string.slice(0, start) + "<b>" + string.slice(start, end) + "</b>" + string.slice(end);
-  return newString;
-}
-
-const getCurrentFunction = (els) => {
-  els.forEach((el) => {
-    if(el.classList.contains("active")) {
-      return el.classList[1];
-    }
-  })
-  return false;
-}
 
 const toLettersArray = (string) => {
   let arr = [];
@@ -23,27 +8,80 @@ const toLettersArray = (string) => {
 }
 toDisplay = toLettersArray(selectedText);
 
+const applyTag = (tag, text, start, end) => {
+    return text.slice(0, start) + `<${tag}>` + text.slice(start, end+1) + `</${tag}>` + text.slice(end+1);
+}
+
 const renderPar = (display, selecting, rectObj) => {
-  const container = document.querySelector(".container");
-  container.innerHTML = "";
-  for(let j = 0; j < toDisplay.length; j++) {
-    const span = document.createElement("span");
-    span.classList.add("letter")
-    span.innerText = display[j];
-    container.appendChild(span);
-    const positionInfo = span.getBoundingClientRect();
-    const position = [positionInfo.x, positionInfo.y];
-    if(position[0] > rectObj.startPoint[0] && position[0] < rectObj.endPoint[0] && position[1] > rectObj.startPoint[1] && position[1] < rectObj.endPoint[1]) {
-      span.classList.add("selected");
+    const readTag = (display, index) => {
+        let tag = "", startIndex = index, currentIndex = index;
+        while(display[currentIndex] != ">"){
+            if(!["<", ">", "/"].includes(display[currentIndex]))
+                tag+=display[currentIndex];
+            currentIndex++;
+        }
+        return tag;
+    } 
+
+    let onLetterFunctions = {
+        bold: {
+            shouldApply: false,
+            onElement: function(element) {
+                element.classList.add("make-bold");
+            }
+        },
+        cursive: {
+            shouldApply: false,
+            onElement: function(element) {
+                element.classList.add("make-cursive");
+            }
+        }
     }
-    if(span.classList.contains("selected")){
-      console.log("has selected")
-      if(firstSelected == false)
-        firstSelected = j;
-      else lastSelected = j;
+
+    let avalaibleFunctions = Object.keys(onLetterFunctions)
+
+    const container = document.querySelector(".container");
+    container.innerHTML = "";
+
+    let omit = 0;
+    for(let j = 0; j < toDisplay.length; j++){
+        if(display[j] == "<"){
+            let tagId = readTag(display, j), setTo = true;
+            console.log(tagId)
+            if(j < display.length && display[j+1] == "/"){
+                setTo = false;
+                omit += tagId.length+4;
+            }else omit += tagId.length+2;  
+            console.log(omit);
+            avalaibleFunctions.includes(tagId) ? onLetterFunctions[tagId].shouldApply = setTo : null;
+        }
+        if(omit > 0) omit--; else{
+            const span = document.createElement("span");
+            span.classList.add("letter");
+            if(display[j] == " ") span.classList.add("blank")
+            span.innerText = display[j];    
+            container.appendChild(span);
+            avalaibleFunctions.forEach((letterFunction) => {
+                if(onLetterFunctions[letterFunction].shouldApply)
+                onLetterFunctions[letterFunction].onElement(span);
+            })
+            const positionInfo = span.getBoundingClientRect();
+            const position = [positionInfo.x, positionInfo.y];
+            if(j == 8){
+                console.log(position[0], position[1])
+            }
+            if(position[0] > rectObj.startPoint[0] && position[0] < rectObj.endPoint[0] && position[1] > rectObj.startPoint[1] && position[1] < rectObj.endPoint[1]) {
+                span.classList.add("selected");
+            }
+            if(span.classList.contains("selected")){
+                console.log("has selected")
+                if(firstSelected == false)
+                    firstSelected = j;
+                else lastSelected = j;
+            }
+        }
     }
-  }
-  console.log(firstSelected, lastSelected)
+    console.log(firstSelected, lastSelected)
 }
 
 const displayRect = (rectObj) => {
@@ -75,21 +113,14 @@ let rectObj = {
 }
 
 let viewport = document.querySelector("html");
-viewport.addEventListener("mousedown", (e) => {
+let container = document.querySelector(".container");
+container.addEventListener("mousedown", (e) => {
   rectObj.startPoint = [e.pageX, e.pageY];
-  viewport.addEventListener("mouseup", (e) => {
+  container.addEventListener("mouseup", (e) => {
     rectObj.endPoint = [e.pageX, e.pageY];
+    console.log(rectObj)
     displayRect(rectObj);
     renderPar(toDisplay, true, rectObj);
-    // let currentFunction = getCurrentFunction(buttons);
-    let currentFunction = "bold";
-    switch(currentFunction){
-      default: break;
-      case "bold": 
-        selectedText = makeBold(selectedText, firstSelected, lastSelected);
-        console.log(selectedText);
-        break;
-    }
   })
 })
 
@@ -97,13 +128,10 @@ renderPar(toDisplay, selecting, rectObj);
 
 const buttons = document.querySelectorAll(".function-button")
 
-buttons.forEach((button, index) => {
+buttons.forEach((button) => {
   button.addEventListener("click", () => {
-    buttons.forEach((otherButton, otherIndex) => {
-      if(otherIndex == index) {
-        otherButton.classList.add("active");
-      }else otherButton.classList.remove("active");
-    })
+    if(lastSelected != false && firstSelected != false)
+        toDisplay = toLettersArray(applyTag(button.getAttribute("function-id"), selectedText, firstSelected, lastSelected));
+    console.log(toDisplay);
   })
 })
-
