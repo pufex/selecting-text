@@ -4,15 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="style.css" rel="stylesheet" />
+  <link rel="stylesheet" href="rolly-list.css">
   <title>Document</title>
 </head>
 <body>
-  <div class="buttons">
-    <button class="function-button bold">
-      B
-    </button>
-  </div>
-  <p class="container"></p>
-  <script src="app.js"></script>
+    <nav class="nav-container">
+        <div class="nav">
+            <h1 class="nav-title">
+                Select text!
+            </h1>
+            <div class="rolly">
+                <div class="rolly-icon">
+                    ↴
+                </div>
+                <div class="rolly-list-container">
+                    <div class="rolly-links">
+                        <a href="twitter.com" class="rolly-link twitter" target="_blank">
+                            My Twitter
+                        </a>
+                        <a href="https://github.com/pufex" class="rolly-link github" target="_blank">
+                            My Github
+                        </a>
+                        <a href="https://github.com/vwwwwwv420" class="rolly-link github" target="_blank">
+                            My 2nd Github
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="main">
+        <div class="buttons">
+            <div class="function-buttons">
+                <button class="function-button bold" function-id="bold">
+                    B
+                </button>
+                <button class="function-button cursive" function-id="cursive">
+                    I
+                </button>
+            </div>
+        </div>
+        <p class="container"></p>
+    </main>
+    <script src="app.js"></script>
+    <script src="rolly-list.js"></script>
 </body>
 </html>
