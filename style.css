@@ -1,0 +1,25 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,html{
+  min-height: 100vh;
+  width: 100%;  
+}
+
+.letter{
+  display: inline-block;
+  user-select: none;
+}
+
+.selected{
+  background-color: red;
+}
+
+.selecting-rectangle{
+  position: absolute;
+  top: 0;
+  z-index: -1;
+}
